@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Dexie from "dexie";
-import FileUploader from "./components/fileuploader.tsx";
-import OfflineDB from "./components/offlinedb.tsx";
-
+import CsvUploader from "./components/csvuploader";
+import OfflineDB from "./components/offlinedb";
 
 export default function Home() {
   const [csvData, setCSVData] = useState(null);
@@ -18,7 +17,7 @@ export default function Home() {
 
   return (
       <div>
-        <FileUploader onCSVUpload={setCSVData} />
+        <CsvUploader onCSVUpload={setCSVData} />
         <OfflineDB csvData={csvData}/>
       </div>
   );

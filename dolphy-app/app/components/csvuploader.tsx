@@ -22,17 +22,9 @@ const CsvUploader = ({ onCSVUpload }) => {
                 header: true,
                 skipEmptyLines: true,
                 complete: (results) => {
-                    if(results.data.length > 0) {
-                        onCSVUpload({
-                            file: file,
-                            firstRow: results.data[0]
-                        });
-                    } else {
-                        onCSVUpload({
-                            file: file,
-                            firstRow: null
-                        });
-                    }
+                    onCSVUpload({
+                        file: file
+                    });
                 },
                 error: (err) => {
                     setErr("Error parsing CSV: " + err.message);

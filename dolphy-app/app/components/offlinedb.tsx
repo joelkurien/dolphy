@@ -4,6 +4,7 @@ import { db } from "../db_components/csv_db.js"
 import { useState, useEffect } from "react";
 import Papa from "papaparse";
 import { useLiveQuery } from "dexie-react-hooks"
+import CleanerForm from "../components/jsonuploader";
 
 const OfflineDB = ({ csvData }) => {
     const rows = useLiveQuery(() => db.table('csv_data')
@@ -36,7 +37,6 @@ const OfflineDB = ({ csvData }) => {
                     await db.open();
                     await db.csv_data.clear();
                     await db.csv_data.bulkAdd(data);
-                    console.log(data.length);
                     console.log("New Table is cached");
                 } catch(err) {
                     console.log("Schema failed to create a new table in the db: ", err);
@@ -51,20 +51,24 @@ const OfflineDB = ({ csvData }) => {
     const headers = Object.keys(rows[0]).filter(key => key !== 'id');
 
     return (
-        <table>
-            <thead>
-                <tr>
-                    {headers.map( header => <th key={header}>{header}</th>)}
-                </tr>
-            </thead>
-            <tbody>
-                {rows.map((row) => (
-                    <tr key={row.id}>
-                        {headers.map(header => <td key={header}>{row[header]}</td>)}
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        {headers.map( header => <th key={header}>{header}</th>)}
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {rows.map((row) => (
+                        <tr key={row.id}>
+                            {headers.map(header => <td key={header}>{row[header]}</td>)}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <CleanerForm headers={headers} />
+        </div>
     );
 };
 

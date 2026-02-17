@@ -16,10 +16,9 @@ const CleanerForm = ({ headers }) => {
     const typeOptions = [1,2,3,4,5];
 
     const cleanOptions = {
-        1: ['string-int', 'allow null', 'preserve lead zeroes', 'mode impute',
-                         'logical-boundary-valdiate', 'checksum', 'seq-gap-analysis', 
-                         'ranking', 'knn-impute', 'mice', 'indicator-flag', 
-                         'outlier-detect'],
+        1: ['string-int', 'remove null', 'mode impute',
+            'seq-gap-analysis', 'ranking', 
+            'create indicate outlier column', 'remove outlier'],
         2: ['rounding', 'mean-impute', 'median-impute', 'linear-interpolate',
                          'epsilon-comparison', 'min-max scaling', 'z-score standardize',
                          'winsorize','log-transform', 'Box-cox transform', 'unit norm', 

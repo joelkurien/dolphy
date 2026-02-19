@@ -1,6 +1,6 @@
 from .base import Operations
 
-from .filters import (
+from .csvfilters import (
     Filter,
     Drop,
 )
@@ -21,7 +21,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "Operations",
-    
+
     "Filter",
     "Drop",
     

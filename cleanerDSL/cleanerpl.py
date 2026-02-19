@@ -17,7 +17,7 @@ class CleanerPipeline:
         self.operations = []
 
     def drop_na(self, columns: Optional[List[str]] = None, 
-                strategy: str = 'null'):
+                strategy: str = 'drop-null'):
         self.operations.append(Drop(columns, strategy))
         return self
     
@@ -39,26 +39,26 @@ class CleanerPipeline:
         return self
 
     def transform(self, columns: List[str], 
-                  strategy: str = 'log', 
-                  replace: bool = False):
-        self.operations.append(Transformation(columns, strategy, replace))
+                  strategy: str = 'log-transform', 
+                  inplace: bool = False):
+        self.operations.append(Transformation(columns, strategy, inplace))
         return self
 
     def filter(self, expression: str):
         self.operations.append(Filter(expression))
         return self
 
-    def standardization(self, columns: Optional[List[str]] = None, strategy: str = 'z-score'):
+    def standardize(self, columns: Optional[List[str]] = None, strategy: str = 'z-score'):
         self.operations.append(Standardize(columns, strategy))
         return self
 
-    def normalize(self, columns: Optional[List[str]] = None, strategy: str = 'lower'):
+    def string_normalize(self, columns: Optional[List[str]] = None, strategy: str = 'lower'):
         self.operations.append(StringNormalize(columns, strategy))
         return self
     
     def execute(self) -> pl.DataFrame:
         result = self.df.lazy()
         for op in self.operations:
-            op.clean()
+            result = op.clean(result)
         return result.collect()
 

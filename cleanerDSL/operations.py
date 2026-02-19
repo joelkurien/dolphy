@@ -10,3 +10,6 @@ with open(filepath) as f:
 
 print(df.head(3))
 px = CleanerPipeline(df)
+px.filter("(Difficulty == 'Medium') and (Acceptance == '49.40%')")
+df = px.execute()
+print(df.head(3))

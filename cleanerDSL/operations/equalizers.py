@@ -10,14 +10,16 @@ class Standardize(Operations):
     inplace: bool = False
 
     def clean(self, result: pl.LazyFrame) -> pl.LazyFrame:
+        schema = result.collect_schema()
+        
         if self.columns is None:
             self.columns = []
-            for col in result.schema.keys():
-                if result.schema[col] != pl.String:
+            for col in schema.keys():
+                if schema[col] != pl.String:
                     self.columns.append(col)
         try:
             for column in self.columns:
-                if column not in result.schema:
+                if column not in schema:
                     raise ValueError(f"Column: {column} is not present in the CSV")
 
                 col = pl.col(column)
@@ -38,7 +40,7 @@ class Standardize(Operations):
                         expression = ((col - col.median()) / (q3 - q1)).alias(alias)
                     case _:
                         raise ValueError(f"Unknown Strategy: {self.strategy}")
-                return result.with_columns(expression)
+                result = result.with_columns(expression)
         except Exception as e:
             print(f"Failed to standardize due due to the following error: {e}")
         return result 
@@ -47,21 +49,20 @@ class Standardize(Operations):
 class StringNormalize(Operations):
     columns: Optional[List[str]]
     strategy: str = "lower"
-    inplace: bool = False
-    delimiter: Optional[str] = None
 
     def clean(self, result: pl.LazyFrame) -> pl.LazyFrame:
+        schema = result.collect_schema()
         if self.columns is None:
             self.columns = []
-            for col in result.schema.keys():
-                if result.schema[col] == pl.String:
+            for col in schema.keys():
+                if schema[col] == pl.String:
                     self.columns.append(col) 
+
         try:
             for column in self.columns:
-                if column not in result.schema:
+                if column not in schema:
                     raise ValueError(f"Column: {column} is not present in the CSV")
 
-                alias = f"{column}_{self.strategy}" if not self.inplace else column
                 col = pl.col(column)
                 match self.strategy:
                     case "lower":
@@ -70,21 +71,11 @@ class StringNormalize(Operations):
                         expression = col.str.to_uppercase()
                     case "strip":
                         expression = col.str.strip_chars()
-                    case "one-hot encoding":
-                        if self.delimiter == None:
-                            raise ValueError("Delimiter needs to be specified")
-                        temp_df = result.collect()
-                        encode = temp_df.to_dummies(
-                            columns = [column],
-                            separator = self.delimiter
-                        )
-                        return encode.lazy()
                     case "label encoding":
                         expression = col.cast(pl.Categorical).to_physical()
                     case _:
                         raise ValueError(f"Strategy {self.strategy} not found")
-                return result.with_columns(expression.alias(alias))
+                result = result.with_columns(expression)
         except Exception as e:
             print(f"String Normalization failed due to : {e}")
         return result
-

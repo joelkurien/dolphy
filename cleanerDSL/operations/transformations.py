@@ -8,45 +8,39 @@ from .base import Operations
 class Transformation(Operations):
     columns: List[str]
     strategy: str = 'log-transform'
-    replace_columns: bool = False
+    inplace: bool = False
 
     def clean(self, result: pl.LazyFrame) -> pl.LazyFrame:
         try:
+            schema = result.collect_schema()
             for column in self.columns:
-                if result.schema[column] == pl.String:
+                if schema[column] == pl.String:
                     raise TypeError("Transformation strategy is not compatible with a String column => cast it or do something else")
+                expression = None
                 match self.strategy:
                     case 'log-transform':
-                        if self.replace_columns:
-                            result = result.with_columns(pl.col(column).log1p())
-                        else:
-                            result = result.with_columns(pl.col(column)
-                                                     .log()
-                                                     .alias(f"{column}_sqrt"))
+                        expression = pl.col(column).log1p()
+                        if not self.inplace:
+                            expression = pl.col(column).log1p().alias(f"{column}_log")
                     case 'sqrt-transform':
-                        if self.replace_columns:
-                            result = result.with_columns(pl.col(column).sqrt())
-                        else:
-                            result = result.with_columns(pl.col(column)
-                                                     .sqrt()
-                                                     .alias(f"{column}_sqrt"))
+                        expression = pl.col(column).sqrt()
+                        if not self.inplace:
+                            expression = expression.alias(f"{column}_sqrt")
                     case 'reciprocal-transform':
-                        if self.replace_columns:
-                            result = result.with_columns(1/pl.col(column))
-                        else:
-                            result = result.with_columns((1/pl.col(column))
-                                                     .alias(f"{column}_sqrt"))
+                        expression = 1/pl.col(column)
+                        if not self.inplace:
+                            expression = expression.alias(f"{column}_reciprocal")
                     case 'yeojohnson-transform':
-                        if self.replace_columns:
-                            result = result.with_columns(
-                                    pl.col(column).map_batches(lambda x: pl.Series(stats.yeojohnson(x.to_numpy())[0]))
-                            )
+                        transform_func = lambda x: pl.Series(stats.yeojohnson(x.to_numpy())[0])
+                        expression = pl.col(column).map_batches(transform_func)
+                        if not self.inplace: 
+                            expression = expression.alias(f"{column}_yj") 
                     case 'square-transform':
-                        if self.replace_columns:
-                            result = result.with_columns(pl.col(column)**2)
-                        else:
-                            result = result.with_columns((pl.col(column)**2)
-                                                     .alias(f"{column}_sqrt"))
+                        expression = pl.col(column)**2
+                        if not self.inplace:
+                            expression = expression.alias(f"{column}_sqr")
+                result = result.with_columns(expression)
+                print(result.head(3).collect())
         except Exception as e:
             print(f"Failed to perform transformation due to the following error: {e}")
         return result 
@@ -62,33 +56,23 @@ class ImputeNa(Operations):
             self.columns = list(result.schema.keys())
         try:
             for column in self.columns:
+                expression = None
                 match self.strategy:
                     case 'default':
-                        result = result.with_columns(
-                            pl.col(column).fill_null(self.value)        
-                        )
+                        expression = pl.col(column).fill_null(self.value)
                     case 'forward':
-                        result = result.with_columns(
-                            pl.col(column).fill_null(strategy = self.strategy)  
-                        )
+                        expression = pl.col(column).fill_null(strategy = self.strategy)  
                     case 'backward':
-                        result = result.with_columns(
-                            pl.col(column).fill_null(strategy = self.strategy)
-                        )
+                        expression = pl.col(column).fill_null(strategy = self.strategy)
                     case 'mean':
-                        result = result.with_columns(
-                            pl.col(column).fill_null(pl.col(column).mean())
-                        )
+                        expression = pl.col(column).fill_null(pl.col(column).mean())
                     case 'median':
-                        result = result.with_columns(
-                            pl.col(column).fill_null(pl.col(column).median())
-                        )
+                        expression = pl.col(column).fill_null(pl.col(column).median())
                     case 'mode':
-                        result = result.with_columns(
-                            pl.col(column).fill_null(pl.col(column).mode().first())
-                        )
+                        expression = pl.col(column).fill_null(pl.col(column).mode().first())
                     case _:
                         raise ValueError("Strategy not found")
+                result = result.with_columns(expression)
         except Exception as e:
             print(f"Failure in null value imputation: {e}")
         return result

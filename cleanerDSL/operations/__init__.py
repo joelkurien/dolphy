@@ -17,6 +17,10 @@ from .equalizers import (
     StringNormalize,
 )
 
+from .validators import (
+    ValidateCommand
+)
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -32,4 +36,6 @@ __all__ = [
 
     "Standardize",
     "StringNormalize",
+
+    "ValidateCommand",
 ]

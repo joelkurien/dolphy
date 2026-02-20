@@ -17,30 +17,21 @@ class Transformation(Operations):
                 if schema[column] == pl.String:
                     raise TypeError("Transformation strategy is not compatible with a String column => cast it or do something else")
                 expression = None
+                alias = column if self.inplace else f"{column}_t"
                 match self.strategy:
                     case 'log-transform':
                         expression = pl.col(column).log1p()
-                        if not self.inplace:
-                            expression = pl.col(column).log1p().alias(f"{column}_log")
                     case 'sqrt-transform':
                         expression = pl.col(column).sqrt()
-                        if not self.inplace:
-                            expression = expression.alias(f"{column}_sqrt")
                     case 'reciprocal-transform':
                         expression = 1/pl.col(column)
-                        if not self.inplace:
-                            expression = expression.alias(f"{column}_reciprocal")
                     case 'yeojohnson-transform':
                         transform_func = lambda x: pl.Series(stats.yeojohnson(x.to_numpy())[0])
                         expression = pl.col(column).map_batches(transform_func)
-                        if not self.inplace: 
-                            expression = expression.alias(f"{column}_yj") 
                     case 'square-transform':
                         expression = pl.col(column)**2
-                        if not self.inplace:
-                            expression = expression.alias(f"{column}_sqr")
-                result = result.with_columns(expression)
-                print(result.head(3).collect())
+                if expression is not None:
+                    result = result.with_columns(expression.alias(alias))
         except Exception as e:
             print(f"Failed to perform transformation due to the following error: {e}")
         return result 

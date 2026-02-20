@@ -1,12 +1,23 @@
 import ast
 import polars as pl
+import re
 
 class FilterParser:
+    def __init__(self):
+        self.OPERATORS = {
+            ' gt ' : ' > ',
+            ' lt ' : ' < ',
+            ' gte ': ' >= ',
+            ' lte ': ' <= ',
+            ' eq ': ' == ',
+            ' neq ': ' != ',
+        }
+
     def create_plr_expr(self, expr):
         if isinstance(expr, ast.Compare):
             left = self.create_plr_expr(expr.left)
             op = expr.ops[0]
-
+            
             right = self.create_plr_expr(expr.comparators[0])
 
             if isinstance(op, ast.Gt): return left > right
@@ -33,8 +44,24 @@ class FilterParser:
 
         raise ValueError(f"Invalid operation: {type(expr)}")
 
+    def map_operators(self, query_str):
+        for word, symbol in self.OPERATORS.items():
+            query_str = query_str.replace(word, symbol)
+        return query_str
+
     def parse(self,query_str):
-        query = query_str.replace(" and ", " & ").replace(" or ", " | ")
+        query_str = self.map_operators(query_str)
+        query_str = re.sub(
+            r'(==|!=)\s*([A-Za-z][A-Za-z0-9_]*)',
+            lambda m: f'{m.group(1)} \'{m.group(2)}\'',
+            query_str
+        )
+
+        if '(' not in query_str:
+            query = re.sub(r'(\w+\s*(?:==|!=|>=|<=|>|<)\s*(?:\'[^\']*?\'|"[^"]*?"|\d+\.\d+|\d+|\w+))', r'(\1)', query_str)
+        else:
+            query = query_str
+        query = query.replace(" and ", " & ").replace(" or ", " | ")
         tree = ast.parse(query, mode='eval')
         return self.create_plr_expr(tree)
 

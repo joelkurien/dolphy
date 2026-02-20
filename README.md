@@ -1,22 +1,22 @@
-# dolphy csv cleaning dsl
+# DOLPHY csv cleaning DSL
 
 a YAML-based domain specific language for cleaning csv data through a web interface. write cleaning commands in plain english ( no need for shift pressing except brackets) .
 
 ---
 
-## what is this
+## What this
 
 Dolphy lets you clean csv files by writing simple commands in a yaml list. you type the commands in a yaml interface, upload your csv, and get a clean file back. no python, no pandas, no code - ehh maybe some code.
 
 ---
 
-## key design principle
+## Design Principle
 
 the dsl is designed so that if you are lazy with python or sql then try out this cool joke yaml language. Write it in whatever case you want I do not care, or may be I might care if some bugs popup which I will have to fix.
 
 ---
 
-## getting started
+## Getting Started
 
 commands are written as a yaml list and pasted into the web interface:
 
@@ -31,7 +31,7 @@ upload your csv, paste your commands, and click run.
 
 ---
 
-## command reference
+## Command Reference
 
 ### filtering rows
 
@@ -57,7 +57,7 @@ filter rows using conditions. supports word-based operators so you never need sy
 | eq | == | equals |
 | neq | != | not equal |
 
-**combining conditions:**
+**Combining conditions:**
 
 ```yaml
 - filter where age gt 30 and salary lt 70000
@@ -65,7 +65,7 @@ filter rows using conditions. supports word-based operators so you never need sy
 - filter where age gt 18 and name eq charlie and city eq berlin
 ```
 
-**using brackets for complex conditions:**
+**Using brackets for complex conditions:**
 
 brackets are the only time you need the shift key.
 
@@ -75,7 +75,7 @@ brackets are the only time you need the shift key.
 
 ---
 
-### dropping null and nan rows
+### Dropping null and nan rows
 
 ```yaml
 - drop any null rows
@@ -89,7 +89,7 @@ brackets are the only time you need the shift key.
 
 ---
 
-### filling null values
+### Filling null values
 
 ```yaml
 - fill null using mean
@@ -106,9 +106,9 @@ for a custom fill value (like a specific word or number), just write it after `u
 
 ---
 
-### transformations
+### Transformations
 
-apply mathematical transformations to numeric columns.
+Apply mathematical transformations to numeric columns.
 
 ```yaml
 - transform columns age using log
@@ -123,9 +123,9 @@ without `inplace`, a new column is created (e.g. `age_log`). with `inplace`, the
 
 ---
 
-### normalisation
+### Normalisation
 
-**numeric normalisation:**
+**Numeric Normalisation:**
 
 ```yaml
 - normalise columns age using z-score
@@ -133,7 +133,7 @@ without `inplace`, a new column is created (e.g. `age_log`). with `inplace`, the
 - normalise columns score using robust
 ```
 
-**string normalisation:**
+**String normalisation:**
 
 ```yaml
 - normalise columns name using lower
@@ -144,7 +144,7 @@ without `inplace`, a new column is created (e.g. `age_log`). with `inplace`, the
 
 ---
 
-### renaming columns
+### Renaming Columns
 
 ```yaml
 - rename age to years
@@ -155,7 +155,7 @@ column names with spaces are supported — just write them as-is and separate mu
 
 ---
 
-## using the web app
+## Using the web app
 
 1. go to the web app url
 2. upload your csv file
@@ -166,9 +166,9 @@ column names with spaces are supported — just write them as-is and separate mu
 
 ---
 
-## full example
+## Full example
 
-given a csv with columns: `age`, `salary`, `name`, `city`
+Given a csv with columns: `age`, `salary`, `name`, `city`
 
 ```yaml
 - drop any null rows
@@ -184,7 +184,7 @@ given a csv with columns: `age`, `salary`, `name`, `city`
 
 ---
 
-## notes
+## Notes
 
 - commands are case-insensitive — `FILTER WHERE` and `filter where` both work
 - column names are case-sensitive and must match the csv header exactly
@@ -194,7 +194,7 @@ given a csv with columns: `age`, `salary`, `name`, `city`
 
 ---
 
-## tech stack
+## Tech Stack
 
 - **polars** — fast dataframe processing with lazy evaluation
 - **pydantic** — column validation before execution

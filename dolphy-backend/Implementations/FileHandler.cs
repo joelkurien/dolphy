@@ -37,7 +37,7 @@ namespace dolphy_backend.Implementations
 
         public async Task<string> MergeBatches(string tempPath, string file_id)
         {
-            var finalPath = Path.Combine(Path.GetTempPath(), $"{file_id}.csv");
+            var finalPath = Path.Combine(Constants.storagePath, $"{file_id}.csv");
 
             using (var finalStream = new FileStream(finalPath, FileMode.Create)) 
             {

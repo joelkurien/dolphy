@@ -18,7 +18,6 @@ export default function Home() {
   return (
       <div>
         <CsvUploader onCSVUpload={setCSVData} />
-        <OfflineDB csvData={csvData}/>
       </div>
   );
 }

@@ -1,4 +1,5 @@
-﻿using dolphy_backend.Implementations;
+﻿using dolphy_backend.DataTypes;
+using dolphy_backend.Implementations;
 using dolphy_backend.Interfaces;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,36 @@ namespace dolphy_backend.Controllers
     public class CleanerController() : ControllerBase
     {
         private readonly IFileCleaner _fileCleaner = new FileCleaner();
+        private readonly IFileHandler _fileHandler = new FileHandler();
+
+        [HttpPost("uploadfile")]
+        public async Task<IActionResult> UploadCsvBatch([FromForm] ChunkRequest request) 
+        {
+            try
+            {
+                if (request.CsvChunk != null && request.FileId != null) 
+                {
+                    var status = await _fileHandler.BatchUpload(request.CsvChunk,
+                                                            request.FileId,
+                                                            request.ChunkIndex,
+                                                            request.TotalChunks);
+                    if (status != null && status["state"] == "file merged")
+                    {
+                        string fileId = status["FileId"] != null ? status["FileId"] : "0";
+                        string filePath = status["FilePath"] != null ? status["FilePath"] : "";
+                        return Ok(new { message = "File Uploaded", fileId , filePath});
+                    }
+                    Console.WriteLine(status);
+                }
+                return BadRequest("Batched File upload failed");
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"File Batch upload failed due to : {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        } 
+
 
         [HttpPost("enqueue_clean")]
         public async Task<IActionResult> PostCleanCsv(IFormFile csvToClean, [FromBody] string instructionsJson)

@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>dolphy_backend</RootNamespace>
+    <UserSecretsId>e7dddd4e-5d6e-4502-b649-d187718b8d83</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

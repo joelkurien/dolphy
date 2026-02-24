@@ -1,10 +1,23 @@
+using dolphy_backend.Implementations;
+using dolphy_backend.Interfaces;
 using Hangfire;
 using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//Redis Distributed Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Dolphy_";
+});
 
+// Add services to the container
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddScoped<IFileCleaner, FileCleaner>();
+builder.Services.AddScoped<IFileHandler, FileHandler>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

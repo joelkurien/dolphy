@@ -2,6 +2,8 @@
 {
     public class Constants 
     {
-        public static readonly string storagePath = "~/storage/";
+        public readonly static string homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        public readonly static string inboundStorage = "storage/inbound";
+        public readonly static string outboundStorage = "storage/outbound";
     }
 }

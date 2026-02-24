@@ -2,7 +2,7 @@
 {
     public class ChunkRequest
     {
-        public IFormFile? CsvChunk { get; set; }
+        public required IFormFile CsvChunk { get; set; }
         public string? FileId   { get; set; }
         public int ChunkIndex { get; set; }
         public int TotalChunks { get; set; }

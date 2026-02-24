@@ -1,0 +1,71 @@
+# --- GLOBAL / IDE ---
+
+.DS_Store
+.vs/
+.vscode/
+
+.idea/
+
+*.swp
+
+
+
+# --- .NET (dolphy-backend) ---
+
+[Bb]in/
+
+[Oo]bj/
+
+[Dd]ebug/
+
+[Rr]elease/
+
+*.user
+
+*.lock.json
+
+# Ensure you DO NOT ignore .csproj files here
+
+
+
+# --- NEXT.JS / NODE ---
+
+node_modules/
+
+.next/
+
+out/
+
+build/
+
+.env*.local
+
+npm-debug.log*
+
+yarn-error.log*
+
+
+
+# --- PYTHON ---
+
+__pycache__/
+
+*.py[cod]
+
+*$py.class
+
+.venv/
+
+venv/
+
+ENV/
+
+.env
+
+.pytest_cache/
+
+
+
+# --- PROJECT SPECIFIC ---
+
+storage/

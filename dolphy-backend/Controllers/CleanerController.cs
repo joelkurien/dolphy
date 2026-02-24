@@ -8,10 +8,16 @@ namespace dolphy_backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CleanerController() : ControllerBase
+    public class CleanerController : ControllerBase
     {
-        private readonly IFileCleaner _fileCleaner = new FileCleaner();
-        private readonly IFileHandler _fileHandler = new FileHandler();
+        private readonly IFileCleaner _fileCleaner;
+        private readonly IFileHandler _fileHandler;
+
+        public CleanerController(IFileCleaner fileCleaner, IFileHandler fileHandler)
+        {
+            _fileCleaner = fileCleaner;
+            _fileHandler = fileHandler;
+        }
 
         [HttpPost("uploadfile")]
         public async Task<IActionResult> UploadCsvBatch([FromForm] ChunkRequest request) 
@@ -20,7 +26,7 @@ namespace dolphy_backend.Controllers
             {
                 if (request.CsvChunk != null && request.FileId != null) 
                 {
-                    var status = await _fileHandler.BatchUpload(request.CsvChunk,
+                    var status = await _fileHandler.BatchUploadAsync(request.CsvChunk,
                                                             request.FileId,
                                                             request.ChunkIndex,
                                                             request.TotalChunks);
@@ -30,7 +36,6 @@ namespace dolphy_backend.Controllers
                         string filePath = status["FilePath"] != null ? status["FilePath"] : "";
                         return Ok(new { message = "File Uploaded", fileId , filePath});
                     }
-                    Console.WriteLine(status);
                 }
                 return BadRequest("Batched File upload failed");
             }
@@ -45,9 +50,10 @@ namespace dolphy_backend.Controllers
         [HttpPost("enqueue_clean")]
         public async Task<IActionResult> PostCleanCsv(IFormFile csvToClean, [FromBody] string instructionsJson)
         {
-            string tempCsvPath = Path.Combine(Constants.storagePath, $"{Guid.NewGuid()}");
-            string tempJsonPath = Path.Combine(Constants.storagePath, $"{Guid.NewGuid()}");
-            string cleanedCsvPath = Path.Combine(Constants.storagePath, $"{Guid.NewGuid()}");
+            var tempStorage = Path.Combine(Constants.homePath, Constants.inboundStorage);
+            string tempCsvPath = Path.Combine(tempStorage, $"{Guid.NewGuid()}");
+            string tempJsonPath = Path.Combine(tempStorage, $"{Guid.NewGuid()}");
+            string cleanedCsvPath = Path.Combine(tempStorage, $"{Guid.NewGuid()}");
 
             try
             {
@@ -69,5 +75,21 @@ namespace dolphy_backend.Controllers
                 return BadRequest("Job failed to complete successfully");
             }
         }
+
+        [HttpGet("csv_pages")]
+        public async Task<IActionResult> GetCsvPages([FromQuery] string fileId, [FromQuery] int pageNo = 1, [FromQuery] int pageSize = 20) 
+        {
+            try 
+            {
+                var pageResult = await _fileHandler.GetCsvPaginationAsync(fileId, pageNo, pageSize);
+                return Ok(new { message = "Pages ", pageResult });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Csv Pagination failed: {ex.Message}");
+                return BadRequest("CSV Pagination failed to load");
+            }
+        }
+
     }
 }

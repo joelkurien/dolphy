@@ -1,6 +1,8 @@
-﻿namespace dolphy_backend.Interfaces
+﻿using dolphy_backend.DataTypes;
+
+namespace dolphy_backend.Interfaces
 {
-    internal interface IFileCleaner
+    public interface IFileCleaner
     {
         public Task RunCsvCleaner(string csvPath, string instructionPath, string cleanedCsvPath);
     }

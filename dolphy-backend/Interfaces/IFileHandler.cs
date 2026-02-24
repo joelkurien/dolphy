@@ -1,7 +1,11 @@
-﻿namespace dolphy_backend.Interfaces
+﻿using dolphy_backend.DataTypes;
+
+namespace dolphy_backend.Interfaces
 {
-    internal interface IFileHandler
+    public interface IFileHandler
     {
-        public Task<IDictionary<string, string>> BatchUpload(IFormFile file, string file_id, int chunk_idx, int total_chunks);
+        public Task<IDictionary<string, string>> BatchUploadAsync(IFormFile file, string file_id, int chunk_idx, int total_chunks);
+
+        public Task<PageResult> GetCsvPaginationAsync(string file_id, int pageNo, int pageSize);
     }
 }

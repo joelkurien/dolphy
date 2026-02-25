@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using dolphy_backend.DataTypes;
 using dolphy_backend.Interfaces;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
@@ -43,7 +44,8 @@ namespace dolphy_backend.Implementations
                 {
                     FileId = file_id,
                     FilePath = filePath,
-                    TotalRows = totalRows
+                    TotalRows = totalRows,
+                    FileUploadTime = DateTime.UtcNow
                 };
 
                 await _redis.SetStringAsync($"file:{file_id}:meta", 
@@ -101,10 +103,12 @@ namespace dolphy_backend.Implementations
             var result = new PageResult { Data = [], SourcedFrom = "Storage" };
             try
             {
+                var filePath = default(string);
+
                 var fileMetaJson = await _redis.GetStringAsync($"file:{file_id}:meta");
                 var fileMetaData = fileMetaJson != null ? JsonSerializer.Deserialize<SessionFileMeta>(fileMetaJson) : null;
 
-                var filePath = fileMetaData != null ? fileMetaData.FilePath : "";
+                filePath = fileMetaData != null ? fileMetaData.FilePath : "";
 
                 var cacheKey = $"file:{file_id}:p{pageNo}:s{pageSize}";
 

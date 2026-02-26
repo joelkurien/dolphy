@@ -20,6 +20,14 @@ namespace dolphy_backend.Implementations
             _redis = redis;
         }
 
+        /// <summary>
+        /// Batch upload of a csv to a storage location
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="file_id"></param>
+        /// <param name="chunk_idx"></param>
+        /// <param name="total_chunks"></param>
+        /// <returns></returns>
         public async Task<IDictionary<string, string>> BatchUploadAsync(IFormFile? file, string file_id, int chunk_idx, int total_chunks) 
         {
             var tempPath = Path.Combine(Path.GetTempPath(), $"{file_id}");
@@ -65,6 +73,13 @@ namespace dolphy_backend.Implementations
             };
         }
 
+        /// <summary>
+        /// Merge all the batches of a csv into a single csv and store its metadata into a postgresDB
+        /// and return the final csv path
+        /// </summary>
+        /// <param name="tempPath"></param>
+        /// <param name="file_id"></param>
+        /// <returns></returns>
         public async Task<List<string>> MergeBatchesAsync(string tempPath, string file_id)
         {
             var fileStorageLoc = Path.Combine(Constants.homePath, Constants.inboundStorage);
@@ -98,6 +113,13 @@ namespace dolphy_backend.Implementations
             return [finalPath, totalRows.ToString()];
         }
 
+        /// <summary>
+        /// Get a set of rows of a table for the requested page of the csv.
+        /// </summary>
+        /// <param name="file_id"></param>
+        /// <param name="pageNo"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         public async Task<PageResult> GetCsvPaginationAsync(string file_id, int pageNo, int pageSize) 
         {
             var result = new PageResult { Data = [], SourcedFrom = "Storage" };

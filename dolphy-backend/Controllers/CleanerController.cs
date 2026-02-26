@@ -19,6 +19,11 @@ namespace dolphy_backend.Controllers
             _fileHandler = fileHandler;
         }
 
+        /// <summary>
+        /// Endpoint to upload a csv - the csv is uploaded as batched to avoid overloading the in-memory of the browser
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("uploadfile")]
         public async Task<IActionResult> UploadCsvBatch([FromForm] ChunkRequest request) 
         {
@@ -46,7 +51,12 @@ namespace dolphy_backend.Controllers
             }
         } 
 
-
+        /// <summary>
+        /// Endpoint to run the clean script of a csv
+        /// </summary>
+        /// <param name="csvToClean"></param>
+        /// <param name="instructionsJson"></param>
+        /// <returns></returns>
         [HttpPost("enqueue_clean")]
         public async Task<IActionResult> PostCleanCsv(IFormFile csvToClean, [FromBody] string instructionsJson)
         {
@@ -76,6 +86,13 @@ namespace dolphy_backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Endpoint to get the rows of a CSV in pages format - pagination of a csv
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <param name="pageNo"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("csv_pages")]
         public async Task<IActionResult> GetCsvPages([FromQuery] string fileId, [FromQuery] int pageNo = 1, [FromQuery] int pageSize = 20) 
         {
